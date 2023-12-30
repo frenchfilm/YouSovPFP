@@ -1,0 +1,14 @@
+gcloud beta functions deploy api \
+--runtime python38 \
+--gen2 \
+--memory=256MB \
+--trigger-http \
+--allow-unauthenticated \
+--min-instances=1 \
+--max-instances=1 \
+--concurrency=1000 \
+--region=us-central1 \
+--timeout=540s \
+--cpu=2 \
+--project=valiant-well-408716 \
+--env-vars-file=.env.yaml
