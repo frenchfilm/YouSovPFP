@@ -189,6 +189,7 @@ def save_image_to_bucket(pilImage):
     bucket = storage_client.bucket(PUBLIC_IMAGES_BUCKET)
     randomGuid = guid.uuid4()
     blob = bucket.blob(f"{randomGuid}.png")
+    # todo check for duplicates
     image_file_object = io.BytesIO()
     pilImage.save(image_file_object, format='PNG')
     image_file_object.seek(0)  # Go back to the start of the file object
@@ -207,6 +208,7 @@ def api(request):
         print("No helm")
         return "Internal server error", 500
     # quality drop here, upgrade to upscale
+    # todo save helm and image on the backup bsafe ucket
     print("Resizing helm")
     helm = helm.resize((800, 800))
     print("Removing bg")
