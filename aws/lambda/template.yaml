@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: ESOV API Lambda Functions
+Resources:
+  GeneratePFPFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      Handler: main.generate_pfp
+      Runtime: python3.8
+      Timeout: 900
+      CodeUri: .
+  GetRandomBGFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      Handler: main.get_random_bg
+      Runtime: python3.8
+      Timeout: 900
+      CodeUri: .

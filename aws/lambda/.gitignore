@@ -1,0 +1,11 @@
+.env
+.env.yaml
+.env.yaml.prod
+*.pkl
+*.csv
+models
+out
+data
+*.json
+encoded_payload
+*.zip

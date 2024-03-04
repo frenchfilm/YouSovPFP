@@ -1,0 +1,5 @@
+pillow
+pyyaml
+boto3
+requests
+redis
