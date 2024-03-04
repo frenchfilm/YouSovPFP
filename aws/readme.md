@@ -8,3 +8,11 @@ run `cd aws/terraform && terraform apply`
 run command on terraform output command_copy_images  
 test lambdas with POST and x-api-key header with value from .env.yaml
 
+roles  
+AmazonEC2FullAccess  
+AmazonElastiCacheFullAccess  
+AmazonS3FullAccess  
+AmazonVPCFullAccess  
+AWSCloudFormationFullAccess  
+AWSLambda_FullAccess  
+IAMFullAccess  
