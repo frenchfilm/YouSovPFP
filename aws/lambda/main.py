@@ -244,6 +244,7 @@ def generate_pfp(request, context):
         })
     }
 
+# todo: rename bg->house images
 def get_random_bg(request, context):
     if not auth(request):
         return {

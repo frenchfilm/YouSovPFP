@@ -233,6 +233,7 @@ resource "aws_iam_role" "api_lambda_role" {
   })
 }
 
+# todo: split and finegrane policies
 resource "aws_iam_policy" "api_lambda_s3_policy" {
   name        = "LambdaS3Policy"
   description = "Policy to allow Lambda to read/write to S3"
@@ -249,7 +250,16 @@ resource "aws_iam_policy" "api_lambda_s3_policy" {
           "${aws_s3_bucket.public_images_bucket.arn}/*",
           "${aws_s3_bucket.images_args_bucket.arn}/*",
         ]
-      }
+      },
+      # {
+      #   Action = [
+      #     R/W
+      #   ],
+      #   Effect = "Allow",
+      #   Resource = [
+      #     "${aws_s3_bucket.images_args_bucket.arn}/*",
+      #   ]
+      # }
     ]
   })
 
