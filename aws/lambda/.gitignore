@@ -9,3 +9,4 @@ data
 *.json
 encoded_payload
 *.zip
+.env.additional.yaml

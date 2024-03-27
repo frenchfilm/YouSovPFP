@@ -97,7 +97,7 @@ def get_cn_image():
         "guess_mode": "no",
         "prompt": "a predator alien wearing a Roman Gladiator helmet with this shape",
         "negative_prompt": None,
-        "init_image": "https://storage.googleapis.com/esov-sdapi-args-images/sp_512.jpg",
+        "init_image": f"https://s3.amazonaws.com/{ARGS_IMAGES_BUCKET}/sp_512.jpg",
         "samples": "1",
         "scheduler": "UniPCMultistepScheduler",
         "num_inference_steps": "35",

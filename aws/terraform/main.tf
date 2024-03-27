@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "oleks-dev-esov-api-terraformstate"
+    bucket = "esov-terraformstate"
     key    = "esov-terraformstate"
     region = "us-east-1"
   }
@@ -63,6 +63,7 @@ resource "aws_s3_bucket_policy" "images_public_policy" {
   ]
 }
 POLICY
+  depends_on = [ aws_s3_bucket_public_access_block.images_public_acl ]
 }
 
 resource "aws_s3_bucket_policy" "images_arg_policy" {
@@ -82,6 +83,7 @@ resource "aws_s3_bucket_policy" "images_arg_policy" {
   ]
 }
 POLICY
+  depends_on = [ aws_s3_bucket_public_access_block.images_arg_acl ]
 }
 
 # vpc
@@ -450,5 +452,5 @@ output "get_random_bg_url" {
 }
 
 output "command_copy_images" {
-  value = "aws s3 cp ./images s3://${aws_s3_bucket.public_images_bucket.bucket} --recursive"
+  value = "aws s3 cp ./images s3://${aws_s3_bucket.images_args_bucket.bucket}/ --recursive"
 }
