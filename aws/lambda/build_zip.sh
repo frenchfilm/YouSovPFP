@@ -11,7 +11,9 @@ sam build
 
 echo "Zipping up the files"
 cd .aws-sam/build/GeneratePFPFunction/
+rm -rf .env.additional.yaml
 zip -r ../../../generatePFPFunction.zip .
 cd ../GetRandomBGFunction/
+rm -rf .env.additional.yaml
 zip -r ../../../getRandomBGFunction.zip .
 cd ../../../../

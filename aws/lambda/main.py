@@ -22,15 +22,22 @@ if os.path.exists(yaml_path):
      os.environ.update(env_vars)
 else:
      print("No .env.yaml file found")
+
+if os.path.exists(additional_yaml_path):
+    print("Loading additional environment variables from .env.additional.yaml")
+    env_vars = yaml.safe_load(open(additional_yaml_path))
+    os.environ.update(env_vars)
+
 PUBLIC_IMAGES_BUCKET = os.environ.get("PUBLIC_IMAGES_BUCKET")
 ARGS_IMAGES_BUCKET = os.environ.get("ARGS_IMAGES_BUCKET")
 SDAPI_KEY = os.environ.get("SDAPI_KEY")
 CLIPDROP_KEY = os.environ.get("CLIPDROP_KEY")
 AUTH_KEY = os.environ.get("AUTH_KEY")
 REDIS_HOST = os.environ.get("REDIS_HOST")
+NFT_API_KEY = os.environ.get("NFTSTORAGE_KEY")
 
-print(f"PUBLIC_IMAGES_BUCKET: {PUBLIC_IMAGES_BUCKET}")
 print(f"ARGS_IMAGES_BUCKET: {ARGS_IMAGES_BUCKET}")
+print(f"PUBLIC_IMAGES_BUCKET: {PUBLIC_IMAGES_BUCKET}")
 print(f"REDIS_HOST: {REDIS_HOST}")
 # print(f"SDAPI_KEY: {SDAPI_KEY}")
 # print(f"CLIPDROP_KEY: {CLIPDROP_KEY}")
@@ -44,6 +51,30 @@ redis_client = redis.StrictRedis(host=REDIS_HOST, port=6379, db=0)
 print("Loaded")
 
 get_s3_pub_url = lambda bucket, key: f"https://{bucket}.s3.amazonaws.com/{key}"
+nft_api_upload_url = "https://api.nft.storage/upload"
+
+def save_image_to_bucket(pilImage):
+    s3 = boto3.resource('s3')
+    randomGuid = guid.uuid4()
+    image_file_object = io.BytesIO()
+    pilImage.save(image_file_object, format='PNG')
+    image_file_object.seek(0)  
+    image_bytes = image_file_object.read()
+    s3.Bucket(PUBLIC_IMAGES_BUCKET).put_object(Key=f"{randomGuid}.png", Body=image_bytes, ContentType="image/png")
+    return f"https://{PUBLIC_IMAGES_BUCKET}.s3.amazonaws.com/{randomGuid}.png"
+
+def upload_to_nft(byte_stream):
+    byte_stream.seek(0)
+    buffer = byte_stream.read()
+    files = {
+        'file': buffer
+    }
+    headers = {
+        'Authorization': f'Bearer {NFT_API_KEY}'
+    }
+    response = requests.post(nft_api_upload_url, files=files, headers=headers)
+    cid = response.json()['value']['cid']
+    return cid
 
 def initData():
     ARGS_IMAGES_BUCKET = os.environ.get("ARGS_IMAGES_BUCKET")
@@ -204,15 +235,47 @@ def compose_image(pilHelm):
     base_image.paste(l1_chin[0], (0, 0), l1_chin[0])
     return base_image
 
-def save_image_to_bucket(pilImage):
-    s3 = boto3.resource('s3')
-    randomGuid = guid.uuid4()
-    image_file_object = io.BytesIO()
-    pilImage.save(image_file_object, format='PNG')
-    image_file_object.seek(0)  
-    image_bytes = image_file_object.read()
-    s3.Bucket(PUBLIC_IMAGES_BUCKET).put_object(Key=f"{randomGuid}.png", Body=image_bytes, ContentType="image/png")
-    return f"https://{PUBLIC_IMAGES_BUCKET}.s3.amazonaws.com/{randomGuid}.png"
+def generate_metadata(image_cid):
+    json_data = {
+        "name": "valiAnt",
+        "description": "valiAnts are the core volunteer participants in the original Riddle of the Crown. They are the few, the brave, they are the gladiators, they are the Revolt!",
+        "image_cid": image_cid,
+        "attributes": [
+        {
+            "trait_type": "Prompt",
+            "value": "Gladiator"
+        },
+        {
+            "trait_type": "Seed",
+            "value": "306620667"
+        },
+        {
+            "trait_type": "Chin guard",
+            "value": "Gold Dragon"
+        },
+        {
+            "trait_type": "Body Type",
+            "value": "Minuteman"
+        },
+        {
+            "trait_type": "Body Color 1",
+            "value": "Blue"
+        },
+        {
+            "trait_type": "Body Color 2",
+            "value": "Green"
+        },
+        {
+            "trait_type": "Background",
+            "value": "Prodigy"
+        },
+        {
+            "trait_type":"MintDate",
+            "value": "2024-03-12"
+        }
+        ]
+    }    
+    return json_data
 
 def generate_pfp(request, context):
     if not auth(request):
@@ -234,13 +297,22 @@ def generate_pfp(request, context):
     helm = remove_bg(helm)
     print("Composing image")
     pilImage = compose_image(helm)
-    print("Saving image")
-    imageUrl = save_image_to_bucket(pilImage)
+    print("Saving image to S3")
+    image_url = save_image_to_bucket(pilImage)
+    print("Saving image to IPFS")
+    byte_stream = io.BytesIO()
+    pilImage.save(byte_stream, format='PNG')
+    image_cid = upload_to_nft(byte_stream)
+    print("Saving metadata to IPFS")
+    metadata = generate_metadata(image_cid)
+    metadata_cid = upload_to_nft(io.BytesIO(json.dumps(metadata).encode('utf-8')))
     print("Request ended")
     return {
         'statusCode': 200,
         'body': json.dumps({
-            "imageUrl": imageUrl
+            "image_cid": image_cid,
+            "metadata_cid": metadata_cid,
+            "imageUrl": image_url
         })
     }
 
