@@ -10,3 +10,4 @@ data
 encoded_payload
 *.zip
 .env.additional.yaml
+levelmeta

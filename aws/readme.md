@@ -1,5 +1,8 @@
 ### ESOV API AWS
 
+build metadata with notebook csv_pfp_data_proc.ipynb   
+copy metadata folder to ./images and name to layers_meta   
+copy all background images to ./images/bgs   
 add aws/lambda/.env.yaml with secret api keys  
 run `cd aws/lambda && sh build_zip.sh`  
 add aws/terraform/terraform.tfvars with env vars  
